@@ -3,24 +3,24 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint,abort #Divide api in multiple segments
 from db import items,stores
+from Schemas import ItemSchema,ItemUpdateSchema
 
 blp =Blueprint("items",__name__,description="Operations on items")
 
 @blp.route("/item/<string:item_id>")
 class ItemList(MethodView):
+
+    @blp.response(200,ItemSchema)
     def get (self,item_id):
         try:
-            return items[item_id],201   
+            return items[item_id]
         except KeyError:
             abort(404, message= "item not found") 
-    def put (self,item_id):
+    
+    @blp.arguments(ItemUpdateSchema)
+    @blp.response(201,ItemSchema)
+    def put (self,item_id,item_data):
         try: 
-            item_data=request.get_json()
-            if(
-                "price" not in item_data
-                or "name" not in item_data
-            ):
-                abort(400, message= "Bad request less values passed in request ")
             item=items[item_id]
             item["price"]=item_data["price"]
             item["name"]=item_data["name"]
@@ -36,16 +36,14 @@ class ItemList(MethodView):
 
 @blp.route("/item")
 class Item(MethodView):
+    
+    @blp.response(200,ItemSchema())
     def get(self):
-        return {"items":list(items.values())},201
-    def post(self):
-        item_data=request.get_json()
-        if(
-            "price" not in item_data
-            or "store_id"not in item_data
-            or "name" not in item_data
-        ):
-            abort(400, message= "Bad request less values passed in request")
+        return items.values()
+    
+    @blp.arguments(ItemSchema)
+    @blp.response(201,ItemSchema)
+    def post(self,item_data):
         if item_data["store_id"] not in stores:
             abort(404, message= "store not found")
         for item in items.values():
@@ -57,4 +55,4 @@ class Item(MethodView):
         item_id=uuid.uuid4().hex
         item={**item_data,"id":item_id}
         items[item_id]=item
-        return item,201
+        return item
