@@ -10,9 +10,9 @@ blp =Blueprint("stores",__name__,description="Operations on stores")
 
 @blp.route("/store")
 class Store(MethodView):
-    # @blp.response(201,StoreSchema)
+    @blp.response(201,StoreSchema(many=True))
     def get (self):
-        return {"stores":list(stores.values())}
+        return stores.values()
     
     @blp.arguments(StoreSchema)
     @blp.response(200,StoreSchema)

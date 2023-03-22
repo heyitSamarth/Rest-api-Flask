@@ -19,7 +19,7 @@ class ItemList(MethodView):
     
     @blp.arguments(ItemUpdateSchema)
     @blp.response(201,ItemSchema)
-    def put (self,item_id,item_data):
+    def put (self,item_data,item_id):
         try: 
             item=items[item_id]
             item["price"]=item_data["price"]
@@ -27,6 +27,7 @@ class ItemList(MethodView):
             return item,201
         except KeyError:
             abort(404,  "item not found")  
+    
     def delete(self,item_id):
         try:
             del items[item_id]
@@ -37,7 +38,7 @@ class ItemList(MethodView):
 @blp.route("/item")
 class Item(MethodView):
     
-    @blp.response(200,ItemSchema())
+    @blp.response(200,ItemSchema(many=True))
     def get(self):
         return items.values()
     
