@@ -7,6 +7,7 @@ import secrets
 from blocklist import BLOCKLSIT
 from flask_migrate import Migrate
 
+
 from Resources.item import blp as ItemBlueprint
 from Resources.store import blp as StoreBlueprint
 from Resources.tag import blp as TagBlueprint
@@ -28,12 +29,8 @@ def create_app(db_url=None):
     db.init_app(app)
     migrate = Migrate(app, db)
     api = Api(app)
-
-
     app.config["JWT_SECRET_KEY"] = '82362600056799238578762281734654593836'#<- signing key
     jwt = JWTManager(app)
-    with app.app_context():
-        db.create_all()
     
     @jwt.token_in_blocklist_loader
     def check_if_token_in_blocklist(jwt_header,jwt_payload):
